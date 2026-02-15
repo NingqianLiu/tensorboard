@@ -72,6 +72,10 @@ export interface TooltipDatum<
 }
 
 const SCROLL_ZOOM_SPEED_FACTOR = 0.01;
+const IDLE_TOOLTIP_POINT_RADIUS = 4;
+const ACTIVE_TOOLTIP_POINT_RADIUS = 2;
+const HIDDEN_TOOLTIP_POINT_OPACITY = 0;
+const VISIBLE_TOOLTIP_POINT_OPACITY = 1;
 
 export function scrollStrategyFactory(
   overlay: Overlay
@@ -209,6 +213,8 @@ export class LineChartInteractiveViewComponent
   cursorLocation: {x: number; y: number} | null = null;
   cursoredData: TooltipDatum[] = [];
   tooltipDisplayAttached: boolean = false;
+  tooltipPointRadius = IDLE_TOOLTIP_POINT_RADIUS;
+  tooltipPointOpacity = HIDDEN_TOOLTIP_POINT_OPACITY;
 
   @HostBinding('class.show-zoom-instruction')
   showZoomInstruction: boolean = false;
@@ -343,6 +349,7 @@ export class LineChartInteractiveViewComponent
       .pipe(takeUntil(this.ngUnsubscribe))
       .subscribe((event) => {
         this.isCursorInside = true;
+        this.setTooltipPointActive(false);
         this.updateTooltip(event);
         this.changeDetector.markForCheck();
       });
@@ -354,6 +361,7 @@ export class LineChartInteractiveViewComponent
       .subscribe((event) => {
         this.dragStartCoord = null;
         this.isCursorInside = false;
+        this.setTooltipPointActive(false);
         this.updateTooltip(event);
         this.state.next(InteractionState.NONE);
         this.changeDetector.markForCheck();
@@ -367,11 +375,13 @@ export class LineChartInteractiveViewComponent
         switch (this.state.getValue()) {
           case InteractionState.SCROLL_ZOOMING: {
             this.state.next(InteractionState.NONE);
+            this.setTooltipPointActive(true);
             this.updateTooltip(event);
             this.changeDetector.markForCheck();
             break;
           }
           case InteractionState.NONE:
+            this.setTooltipPointActive(true);
             this.updateTooltip(event);
             this.changeDetector.markForCheck();
             break;
@@ -520,6 +530,15 @@ export class LineChartInteractiveViewComponent
 
   shouldRenderTooltipPoint(point: Point | null): boolean {
     return point !== null && !isNaN(point.x) && !isNaN(point.y);
+  }
+
+  private setTooltipPointActive(isActive: boolean) {
+    this.tooltipPointRadius = isActive
+      ? ACTIVE_TOOLTIP_POINT_RADIUS
+      : IDLE_TOOLTIP_POINT_RADIUS;
+    this.tooltipPointOpacity = isActive
+      ? VISIBLE_TOOLTIP_POINT_OPACITY
+      : HIDDEN_TOOLTIP_POINT_OPACITY;
   }
 
   private updateTooltip(event: MouseEvent) {

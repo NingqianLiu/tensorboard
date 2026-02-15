@@ -262,6 +262,7 @@ describe('metrics reducers', () => {
         new Map([
           ['tagA', true],
           ['tagB', true],
+          ['tagC', true],
         ])
       );
     });

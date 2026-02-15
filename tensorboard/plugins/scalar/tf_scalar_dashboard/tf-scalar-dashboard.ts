@@ -150,7 +150,7 @@ class TfScalarDashboard extends LegacyElementMixin(ArrayUpdateHelper) {
           <template is="dom-repeat" items="[[_categories]]" as="category">
             <tf-category-paginated-view
               category="[[category]]"
-              initial-opened="[[_shouldOpen(index)]]"
+              initial-opened="true"
               get-category-item-key="[[_getCategoryItemKey]]"
             >
               <template>
@@ -231,7 +231,7 @@ class TfScalarDashboard extends LegacyElementMixin(ArrayUpdateHelper) {
   })
   _smoothingWeight: number = tf_storage
     .getNumberInitializer('_smoothingWeight', {
-      defaultValue: 0.6,
+      defaultValue: 0,
     })
     .call(this);
 
@@ -241,7 +241,7 @@ class TfScalarDashboard extends LegacyElementMixin(ArrayUpdateHelper) {
   })
   _ignoreYOutliers: boolean = tf_storage
     .getBooleanInitializer('_ignoreYOutliers', {
-      defaultValue: true,
+      defaultValue: false,
       useLocalStorage: true,
     })
     .call(this);
@@ -284,11 +284,11 @@ class TfScalarDashboard extends LegacyElementMixin(ArrayUpdateHelper) {
   );
 
   _smoothingWeightObserver = tf_storage.getNumberObserver('_smoothingWeight', {
-    defaultValue: 0.6,
+    defaultValue: 0,
   });
 
   _ignoreYOutliersObserver = tf_storage.getBooleanObserver('_ignoreYOutliers', {
-    defaultValue: true,
+    defaultValue: false,
     useLocalStorage: true,
   });
 
@@ -303,10 +303,6 @@ class TfScalarDashboard extends LegacyElementMixin(ArrayUpdateHelper) {
       tf_categorization_utils.CategoryType.SEARCH_RESULTS
       ? ''
       : category.name;
-  }
-
-  _shouldOpen(index) {
-    return index <= 2;
   }
 
   ready() {

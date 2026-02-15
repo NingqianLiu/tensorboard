@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-import {computed, customElement, property} from '@polymer/decorators';
+import {computed, customElement, observe, property} from '@polymer/decorators';
 import {html, PolymerElement} from '@polymer/polymer';
 import '../polymer/irons_and_papers';
 import {LegacyElementMixin} from '../polymer/legacy_element_mixin';
@@ -46,6 +46,7 @@ class TfRunsSelector extends LegacyElementMixin(PolymerElement) {
       out-selected="{{selectedRuns}}"
       regex="{{regexInput}}"
       coloring="[[coloring]]"
+      max-names-to-enable-by-default="999999"
     ></tf-multi-checkbox>
     <paper-button class="x-button" id="toggle-all" on-tap="_toggleAll">
       Toggle All Runs
@@ -166,6 +167,9 @@ class TfRunsSelector extends LegacyElementMixin(PolymerElement) {
     getColor: runsColorScale,
   };
 
+  @property({type: Boolean})
+  _didInitializeRunSelection: boolean = false;
+
   _runStoreListener: baseStore.ListenKey;
 
   _envStoreListener: baseStore.ListenKey;
@@ -184,6 +188,20 @@ class TfRunsSelector extends LegacyElementMixin(PolymerElement) {
   override detached() {
     runsStore.removeListenerByKey(this._runStoreListener);
     environmentStore.removeListenerByKey(this._envStoreListener);
+  }
+
+  @observe('runs.*')
+  _initializeRunSelection() {
+    if (this._didInitializeRunSelection) return;
+    if (!this.runs || !this.runs.length) return;
+
+    const nextSelectionState: Record<string, boolean> = {};
+    this.runs.forEach((run: unknown) => {
+      nextSelectionState[String(run)] = true;
+    });
+
+    this.runSelectionState = nextSelectionState;
+    this._didInitializeRunSelection = true;
   }
 
   _toggleAll() {

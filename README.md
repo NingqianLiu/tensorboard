@@ -1,3 +1,24 @@
+# TensorBoard-Tailored
+
+TensorBoard is a great visualization tool. I made minimal changes to make it easier to use.
+
+```
+cd /Users/nacho/Desktop/tensorboard
+
+bazel clean --expunge
+
+rm -rf /tmp/tb_wheel
+mkdir -p /tmp/tb_wheel
+
+bazel run \
+  --override_repository=zlib=$HOME/tb_deps/zlib_bazel_1_3_1 \
+  --override_repository=rules_cc=$HOME/tb_deps/rules_cc_0_2_16 \
+  //tensorboard/pip_package:build_pip_package -- /tmp/tb_wheel
+
+python3.12 -m pip uninstall -y tensorflow tensorboard tb-nightly
+python3.12 -m pip install --force-reinstall /tmp/tb_wheel/tensorboard-*.whl
+```
+
 # TensorBoard [![GitHub Actions CI](https://github.com/tensorflow/tensorboard/workflows/CI/badge.svg)](https://github.com/tensorflow/tensorboard/actions?query=workflow%3ACI+branch%3Amaster+event%3Apush) [![GitHub Actions Nightly CI](https://github.com/tensorflow/tensorboard/workflows/nightly-release/badge.svg)](https://github.com/tensorflow/tensorboard/actions?query=workflow%3Anightly-release+branch%3Amaster) [![PyPI](https://badge.fury.io/py/tensorboard.svg)](https://badge.fury.io/py/tensorboard)
 
 TensorBoard is a suite of web applications for inspecting and understanding your

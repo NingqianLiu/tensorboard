@@ -81,6 +81,9 @@ Could not start data server: %s.
     https://github.com/tensorflow/tensorboard/issues/4784
 """
 
+_TARGET_NOFILE_SOFT_LIMIT = 65536
+_MIN_NOFILE_SOFT_LIMIT_FOR_FAST_LOADING = 4096
+
 
 class TensorBoard:
     """Class for running TensorBoard.
@@ -414,6 +417,9 @@ class TensorBoard:
     def _make_data_ingester(self):
         """Determines the right data ingester, starts it, and returns it."""
         flags = self.flags
+        nofile_limit = None
+        if flags.load_fast in ("true", "auto"):
+            nofile_limit = _raise_nofile_soft_limit()
         if flags.grpc_data_provider:
             ingester = server_ingester.ExistingServerDataIngester(
                 flags.grpc_data_provider,
@@ -434,7 +440,20 @@ class TensorBoard:
                 sys.stderr.write(msg)
                 sys.exit(1)
 
-        if flags.load_fast == "auto" and _should_use_data_server(flags):
+        should_use_data_server = flags.load_fast == "auto" and _should_use_data_server(
+            flags
+        )
+        if should_use_data_server and _fast_loading_unlikely_to_work(nofile_limit):
+            logger.info(
+                "Note: open file soft limit (%d) is low for --load_fast behavior; "
+                "falling back to slower Python-only load path. To use fast loading, "
+                "increase the limit (for example: `ulimit -n %d`).",
+                nofile_limit,
+                _TARGET_NOFILE_SOFT_LIMIT,
+            )
+            should_use_data_server = False
+
+        if should_use_data_server:
             try:
                 ingester = self._start_subprocess_data_ingester()
                 sys.stderr.write(_DATA_SERVER_ADVISORY_MESSAGE)
@@ -501,6 +520,57 @@ def _should_use_data_server(flags):
         )
         return False
     return True
+
+
+def _fast_loading_unlikely_to_work(nofile_limit):
+    """Whether `--load_fast` is likely to hit the open file limit."""
+    return (
+        nofile_limit is not None
+        and nofile_limit != float("inf")
+        and nofile_limit < _MIN_NOFILE_SOFT_LIMIT_FOR_FAST_LOADING
+    )
+
+
+def _raise_nofile_soft_limit():
+    """Raises the open file soft limit when possible.
+
+    Returns:
+      The new soft limit, or `None` if this platform does not expose it.
+    """
+    if os.name == "nt":
+        return None
+    try:
+        import resource
+    except ImportError:
+        return None
+
+    try:
+        soft, hard = resource.getrlimit(resource.RLIMIT_NOFILE)
+    except (ValueError, OSError):
+        return None
+
+    if soft == resource.RLIM_INFINITY:
+        return float("inf")
+
+    target = _TARGET_NOFILE_SOFT_LIMIT
+    if hard != resource.RLIM_INFINITY:
+        target = min(target, hard)
+    if target <= soft:
+        return soft
+
+    try:
+        resource.setrlimit(resource.RLIMIT_NOFILE, (target, hard))
+    except (ValueError, OSError) as e:
+        logger.info(
+            "Could not raise open file soft limit from %d to %d: %s",
+            soft,
+            target,
+            e,
+        )
+        return soft
+
+    logger.info("Raised open file soft limit from %d to %d", soft, target)
+    return target
 
 
 class TensorBoardSubcommand(metaclass=ABCMeta):

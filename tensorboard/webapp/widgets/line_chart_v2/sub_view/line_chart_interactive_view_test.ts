@@ -109,6 +109,7 @@ describe('line_chart_v2/sub_view/interactive_view test', () => {
   };
   const ByCss = {
     SVG: By.css('svg'),
+    SVG_CIRCLE: By.css('svg circle'),
     SVG_PANNING: By.css('svg.panning'),
     SVG_DRAGGING: By.css('svg.dragging'),
   };
@@ -239,6 +240,25 @@ describe('line_chart_v2/sub_view/interactive_view test', () => {
           (td) => td.textContent
         )
       ).toEqual(['Bar name', '10', '5']);
+    });
+
+    it('hides tooltip points until cursor moves and then enlarges them', () => {
+      const fixture = createComponent();
+      fixture.detectChanges();
+
+      emitEvent(fixture, 'mouseenter', {clientX: 10, clientY: 10});
+      fixture.detectChanges();
+
+      let circle = fixture.debugElement.query(ByCss.SVG_CIRCLE);
+      expect(circle?.attributes['fill-opacity']).toBe('0');
+      expect(circle?.attributes['r']).toBe('4');
+
+      emitEvent(fixture, 'mousemove', {clientX: 20, clientY: 20});
+      fixture.detectChanges();
+
+      circle = fixture.debugElement.query(ByCss.SVG_CIRCLE);
+      expect(circle?.attributes['fill-opacity']).toBe('1');
+      expect(circle?.attributes['r']).toBe('2');
     });
 
     it('omits not visible series', () => {

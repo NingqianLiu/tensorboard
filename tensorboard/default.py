@@ -26,8 +26,7 @@ for less repetition.
 
 
 import logging
-
-import pkg_resources
+from importlib import metadata
 
 from tensorboard.plugins.audio import audio_plugin
 from tensorboard.plugins.core import core_plugin
@@ -119,8 +118,14 @@ def get_dynamic_plugins():
     [1]: https://packaging.python.org/specifications/entry-points/
     """
     return [
-        entry_point.resolve()
-        for entry_point in pkg_resources.iter_entry_points(
-            "tensorboard_plugins"
-        )
+        entry_point.load()
+        for entry_point in _iter_dynamic_plugin_entry_points()
     ]
+
+
+def _iter_dynamic_plugin_entry_points():
+    """Iterates dynamic TensorBoard plugin entry points."""
+    entry_points = metadata.entry_points()
+    if hasattr(entry_points, "select"):
+        return entry_points.select(group="tensorboard_plugins")
+    return entry_points.get("tensorboard_plugins", ())

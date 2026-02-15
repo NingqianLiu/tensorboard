@@ -712,19 +712,15 @@ const reducer = createReducer(
         nextCardList.push(cardId);
       }
 
-      let tagGroupExpanded = state.tagGroupExpanded;
-      if (state.tagGroupExpanded.size === 0) {
-        const cardListWithMetadata = nextCardList
-          .map((cardId) => {
-            return {...newCardMetadataMap[cardId], cardId};
-          })
-          .filter(Boolean);
-        const cardGroups = groupCardIdWithMetdata(cardListWithMetadata);
-
-        tagGroupExpanded = new Map(state.tagGroupExpanded);
-        for (const group of cardGroups.slice(0, 2)) {
-          tagGroupExpanded.set(group.groupName, true);
-        }
+      const cardListWithMetadata = nextCardList
+        .map((cardId) => {
+          return {...newCardMetadataMap[cardId], cardId};
+        })
+        .filter(Boolean);
+      const cardGroups = groupCardIdWithMetdata(cardListWithMetadata);
+      const tagGroupExpanded = new Map(state.tagGroupExpanded);
+      for (const group of cardGroups) {
+        tagGroupExpanded.set(group.groupName, true);
       }
 
       // Generates next pinned/original card id mapping because they are namespaced

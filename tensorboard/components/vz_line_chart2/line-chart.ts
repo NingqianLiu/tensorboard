@@ -283,7 +283,8 @@ export class LineChart {
     scatterPlot.x(this.xAccessor, xScale);
     scatterPlot.y(this.yValueAccessor, yScale);
     scatterPlot.attr('fill', (d: any) => this.colorScale.scale(d.name));
-    scatterPlot.attr('opacity', 1);
+    // Keep static endpoint dots hidden until interactive tooltip dots appear.
+    scatterPlot.attr('opacity', 0);
     scatterPlot.size(vz_chart_helpers.TOOLTIP_CIRCLE_SIZE * 2);
     scatterPlot.datasets([this.lastPointsDataset]);
     this.scatterPlot = scatterPlot;
@@ -486,9 +487,10 @@ export class LineChart {
           );
         ptsSelection.enter().append('circle').classed('point', true);
         ptsSelection
-          .attr('r', vz_chart_helpers.TOOLTIP_CIRCLE_SIZE)
+          .attr('r', 2)
           .attr('cx', (p) => p.x)
           .attr('cy', (p) => p.y)
+          .attr('opacity', 1)
           .style('stroke', 'none')
           .attr('fill', (p) =>
             this.colorScale.scale(p.dataset.metadata().name)

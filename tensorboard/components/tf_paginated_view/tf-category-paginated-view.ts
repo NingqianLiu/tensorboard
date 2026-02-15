@@ -325,7 +325,7 @@ class TfCategoryPaginatedView<
     type: Number,
     observer: '_limitChanged',
   })
-  _limit: number = 12;
+  _limit: number = 512;
 
   @property({
     type: Number,

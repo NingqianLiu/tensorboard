@@ -59,8 +59,8 @@ const initialURLSearchParams = new URLSearchParams(window.location.search);
 export class TfScalarCard extends PolymerElement {
   static readonly template = html`
     <tf-card-heading
-      tag="[[tag]]"
-      display-name="[[tagMetadata.displayName]]"
+      tag=""
+      display-name="[[tag]]"
       description="[[tagMetadata.description]]"
     ></tf-card-heading>
     <div id="tf-line-chart-data-loader-container">
@@ -89,12 +89,12 @@ export class TfScalarCard extends PolymerElement {
     </div>
     <div id="buttons">
       <paper-icon-button
-        selected$="[[_expanded]]"
+        selected$="[[_attrIfTrue(_expanded)]]"
         icon="fullscreen"
         on-tap="_toggleExpanded"
       ></paper-icon-button>
       <paper-icon-button
-        selected$="[[_logScaleActive]]"
+        selected$="[[_attrIfTrue(_logScaleActive)]]"
         icon="line-weight"
         on-tap="_toggleLogScale"
         title="Toggle y-axis log scale"
@@ -395,6 +395,10 @@ export class TfScalarCard extends PolymerElement {
 
   redraw() {
     this._getChartDataLoader().redraw();
+  }
+
+  _attrIfTrue(value: unknown) {
+    return value ? 'true' : null;
   }
 
   _toggleExpanded(e) {

@@ -13,6 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 import * as _ from 'lodash';
+import * as vz_sorting from '../vz_sorting/sorting';
 import {BaseStore} from './baseStore';
 import {getRouter} from './router';
 
@@ -21,8 +22,9 @@ export class RunsStore extends BaseStore {
   load() {
     const url = getRouter().runs();
     return this.requestManager.request(url).then((newRuns) => {
-      if (!_.isEqual(this._runs, newRuns)) {
-        this._runs = newRuns;
+      const sortedRuns = newRuns.slice().sort(vz_sorting.compareTagNames);
+      if (!_.isEqual(this._runs, sortedRuns)) {
+        this._runs = sortedRuns;
         this.emitChange();
       }
     });

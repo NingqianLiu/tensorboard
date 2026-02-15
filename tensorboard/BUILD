@@ -309,7 +309,6 @@ py_library(
     srcs = ["default.py"],
     srcs_version = "PY3",
     deps = [
-        "//tensorboard:expect_pkg_resources_installed",
         "//tensorboard/backend:experimental_plugin",
         "//tensorboard/plugins/audio:audio_plugin",
         "//tensorboard/plugins/core:core_plugin",
@@ -347,7 +346,6 @@ py_test(
     deps = [
         ":default",
         ":test",
-        "//tensorboard:expect_pkg_resources_installed",
         "//tensorboard/plugins:base_plugin",
     ],
 )
@@ -367,7 +365,6 @@ py_test(
     deps = [
         ":test",
         ":version",
-        "//tensorboard:expect_pkg_resources_installed",
     ],
 )
 

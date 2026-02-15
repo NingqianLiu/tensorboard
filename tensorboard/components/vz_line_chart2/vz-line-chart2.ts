@@ -133,13 +133,21 @@ class VzLineChart2<SeriesMetadata = {}> extends LegacyElementMixin(
         stroke: #999;
         stroke-width: 1.5px;
       }
-      #chartdiv:hover .main {
-        will-change: transform;
+
+      #chartdiv .line-plot .line {
+        stroke-width: 1px;
       }
 
-      .ghost {
+      #chartdiv .line-plot.ghost {
         opacity: 0.2;
-        stroke-width: 1px;
+      }
+
+      #chartdiv .line-plot.ghost .line {
+        stroke-width: 0.6px;
+      }
+
+      #chartdiv:hover .main {
+        will-change: transform;
       }
 
       .plottable .axis text {

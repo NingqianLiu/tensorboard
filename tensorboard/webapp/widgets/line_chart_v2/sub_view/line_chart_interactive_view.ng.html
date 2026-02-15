@@ -30,7 +30,8 @@ limitations under the License.
         [attr.cx]="getDomX(datum.dataPoint.x)"
         [attr.cy]="getDomY(datum.dataPoint.y)"
         [attr.fill]="datum.metadata.color"
-        r="4"
+        [attr.fill-opacity]="tooltipPointOpacity"
+        [attr.r]="tooltipPointRadius"
       ></circle>
     </ng-container>
   </ng-container>
