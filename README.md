@@ -18,6 +18,18 @@ bazel run \
 python3.12 -m pip uninstall -y tensorflow tensorboard tb-nightly
 python3.12 -m pip install --force-reinstall /tmp/tb_wheel/tensorboard-*.whl
 ```
+```
+VENV_BIN=/opt/tb_venv/bin
+PATH="$VENV_BIN:/usr/bin:/bin" bazel run \
+  --repo_env=PATH="$VENV_BIN:/usr/bin:/bin" \
+  --action_env=PATH="$VENV_BIN:/usr/bin:/bin" \
+  --override_repository=zlib=/opt/tb_deps/zlib \
+  --override_repository=rules_cc=/opt/tb_deps/rules_cc \
+  //tensorboard/pip_package:build_pip_package -- /tmp/tb_wheel
+
+/opt/tb_venv/bin/pip install /tmp/tb_wheel/*.whl
+/opt/tb_venv/bin/tensorboard --logdir /path/to/logs
+```
 
 # TensorBoard [![GitHub Actions CI](https://github.com/tensorflow/tensorboard/workflows/CI/badge.svg)](https://github.com/tensorflow/tensorboard/actions?query=workflow%3ACI+branch%3Amaster+event%3Apush) [![GitHub Actions Nightly CI](https://github.com/tensorflow/tensorboard/workflows/nightly-release/badge.svg)](https://github.com/tensorflow/tensorboard/actions?query=workflow%3Anightly-release+branch%3Amaster) [![PyPI](https://badge.fury.io/py/tensorboard.svg)](https://badge.fury.io/py/tensorboard)
 
